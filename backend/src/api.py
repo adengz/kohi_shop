@@ -58,11 +58,13 @@ def update_drink(payload, id):
         abort(404)
 
     data = request.get_json()
-    try:
-        drink.title = data['title']
-        drink.recipe = json.dumps(data['recipe'])
-    except KeyError:
+    if 'title' not in data and 'recipe' not in data:
         abort(400)
+    else:
+        if 'title' in data:
+            drink.title = data['title']
+        if 'recipe' in data:
+            drink.recipe = json.dumps(data['recipe'])
 
     try:
         drink.update()
@@ -70,18 +72,6 @@ def update_drink(payload, id):
         db.session.rollback()
         abort(500)
     return jsonify({'success': True, 'drinks': [drink.long()]})
-
-'''
-@TODO implement endpoint
-    PATCH /drinks/<id>
-        where <id> is the existing model id
-        it should respond with a 404 error if <id> is not found
-        it should update the corresponding row for <id>
-        it should require the 'patch:drinks' permission
-        it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
-        or appropriate status code indicating reason for failure
-'''
 
 
 @app.route('/drinks/<int:id>', methods=['DELETE'])
